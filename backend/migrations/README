@@ -1,0 +1,2 @@
+# Alembic Migrations
+This directory contains Alembic migration scripts and environment configuration for the Wireless Network Traffic Analysis and Alerting System backend.

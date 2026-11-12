@@ -10,109 +10,160 @@ Entities:
 7. Processing_Error: Errors during ingestion, parsing, and processing.
 """
 
+from __future__ import annotations
 
-class User:
-    """User entity.
+from datetime import datetime
+from typing import List, Optional
 
-    Attributes:
-        user_id: Primary Key
-        username: Unique username
-        password_hash: Securely hashed password
-        role: Network Administrator or Security Analyst
-    """
-    pass
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-
-class Log_Batch:
-    """Log_Batch entity.
-
-    Attributes:
-        batch_id: Primary Key
-        user_id: Foreign Key -> User.user_id
-        file_name: Name of uploaded file
-        file_format: CSV, JSON, etc.
-        submitted_at: Submission timestamp
-        processing_status: Status of batch processing
-        total_records: Total records count
-        processed_records: Successfully processed records count
-        failed_records: Failed records count
-    """
-    pass
+from backend.src.database.base import Base
 
 
-class Traffic_Log:
-    """Traffic_Log entity.
+class User(Base):
+    """User entity storing credentials and role information for authentication."""
 
-    Attributes:
-        log_id: Primary Key
-        batch_id: Foreign Key -> Log_Batch.batch_id
-        timestamp: Packet / event timestamp
-        source_address: Source IP address
-        destination_address: Destination IP address
-        source_mac: Source MAC address
-        destination_mac: Destination MAC address
-        protocol: Network protocol
-        log_details: Structured packet/event payload details
-    """
-    pass
+    __tablename__ = "users"
+
+    user_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    role: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    # Relationship: User (1) -> Log_Batch (N)
+    batches: Mapped[List[Log_Batch]] = relationship("Log_Batch", back_populates="user")
 
 
-class Detection_Rule:
-    """Detection_Rule entity.
+class Log_Batch(Base):
+    """Log_Batch entity tracking batch metadata for uploaded log files."""
 
-    Attributes:
-        rule_id: Primary Key
-        rule_name: Name of the detection rule
-        suspicious_activity: Category of suspicious behavior
-        protocol: Target protocol
-        detection_condition: Deterministic condition expression
-        threshold_value: Value threshold for trigger
-        time_window_seconds: Observation time window in seconds
-        severity: Severity rating
-        is_enabled: Boolean flag indicating rule activation
-    """
-    pass
+    __tablename__ = "log_batches"
 
+    batch_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.user_id"), nullable=False, index=True)
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_format: Mapped[str] = mapped_column(String(50), nullable=False)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    processing_status: Mapped[str] = mapped_column(String(50), nullable=False)
+    total_records: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    processed_records: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    failed_records: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
-class Detection_Result:
-    """Detection_Result entity.
-
-    Attributes:
-        result_id: Primary Key
-        log_id: Foreign Key -> Traffic_Log.log_id
-        rule_id: Foreign Key -> Detection_Rule.rule_id
-        rule_match_status: True/False rule match
-        observed_value: Measured metric value
-        threshold_value: Expected rule threshold
-        detection_evidence: Structured evidence summary
-        detection_time: Evaluation timestamp
-    """
-    pass
+    # Relationships
+    user: Mapped[User] = relationship("User", back_populates="batches")
+    traffic_logs: Mapped[List[Traffic_Log]] = relationship("Traffic_Log", back_populates="batch")
+    processing_errors: Mapped[List[Processing_Error]] = relationship("Processing_Error", back_populates="batch")
 
 
-class Alert:
-    """Alert entity.
+class Traffic_Log(Base):
+    """Traffic_Log entity representing individual processed network traffic events."""
 
-    Attributes:
-        alert_id: Primary Key
-        result_id: Foreign Key -> Detection_Result.result_id
-        alert_details: Context and alert description
-        alert_timestamp: Generation timestamp
-        severity: Low, Medium, High, Critical
-        alert_status: New, Acknowledged, Resolved
-    """
-    pass
+    __tablename__ = "traffic_logs"
+
+    log_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    batch_id: Mapped[int] = mapped_column(Integer, ForeignKey("log_batches.batch_id"), nullable=False, index=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    source_address: Mapped[str] = mapped_column(String(45), nullable=False, index=True)
+    destination_address: Mapped[str] = mapped_column(String(45), nullable=False, index=True)
+    source_mac: Mapped[Optional[str]] = mapped_column(String(17), nullable=True)
+    destination_mac: Mapped[Optional[str]] = mapped_column(String(17), nullable=True)
+    protocol: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    log_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Relationships
+    batch: Mapped[Log_Batch] = relationship("Log_Batch", back_populates="traffic_logs")
+    detection_results: Mapped[List[Detection_Result]] = relationship("Detection_Result", back_populates="traffic_log")
+    processing_errors: Mapped[List[Processing_Error]] = relationship("Processing_Error", back_populates="traffic_log")
 
 
-class Processing_Error:
-    """Processing_Error entity.
+class Detection_Rule(Base):
+    """Detection_Rule entity defining deterministic rules and anomaly thresholds."""
 
-    Attributes:
-        error_id: Primary Key
-        batch_id: Foreign Key -> Log_Batch.batch_id
-        log_id: Foreign Key -> Traffic_Log.log_id (nullable)
-        error_type: Classification of processing failure
-        error_message: Detailed diagnostic message
-        error_timestamp: Error timestamp
-    """
-    pass
+    __tablename__ = "detection_rules"
+
+    rule_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    rule_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    suspicious_activity: Mapped[str] = mapped_column(String(100), nullable=False)
+    protocol: Mapped[str] = mapped_column(String(20), nullable=False)
+    detection_condition: Mapped[str] = mapped_column(Text, nullable=False)
+    threshold_value: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    time_window_seconds: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    severity: Mapped[str] = mapped_column(String(20), nullable=False)
+    is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    # Relationship: Detection_Rule (1) -> Detection_Result (N)
+    detection_results: Mapped[List[Detection_Result]] = relationship("Detection_Result", back_populates="rule")
+
+
+class Detection_Result(Base):
+    """Detection_Result entity storing evaluation outcome of traffic logs against rules."""
+
+    __tablename__ = "detection_results"
+
+    result_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    log_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("traffic_logs.log_id"), nullable=False, index=True)
+    rule_id: Mapped[int] = mapped_column(Integer, ForeignKey("detection_rules.rule_id"), nullable=False, index=True)
+    rule_match_status: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    observed_value: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    threshold_value: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    detection_evidence: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    detection_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    traffic_log: Mapped[Traffic_Log] = relationship("Traffic_Log", back_populates="detection_results")
+    rule: Mapped[Detection_Rule] = relationship("Detection_Rule", back_populates="detection_results")
+    alert: Mapped[Optional[Alert]] = relationship("Alert", back_populates="detection_result", uselist=False)
+
+
+class Alert(Base):
+    """Alert entity generated when a suspicious detection result occurs."""
+
+    __tablename__ = "alerts"
+
+    alert_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    result_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("detection_results.result_id"),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+    alert_details: Mapped[str] = mapped_column(Text, nullable=False)
+    alert_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    severity: Mapped[str] = mapped_column(String(20), nullable=False)
+    alert_status: Mapped[str] = mapped_column(String(30), nullable=False)
+
+    # Relationship: Detection_Result (1) -> Alert (0..1)
+    detection_result: Mapped[Detection_Result] = relationship("Detection_Result", back_populates="alert")
+
+
+class Processing_Error(Base):
+    """Processing_Error entity recording failures during log parsing and processing."""
+
+    __tablename__ = "processing_errors"
+
+    error_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    batch_id: Mapped[int] = mapped_column(Integer, ForeignKey("log_batches.batch_id"), nullable=False, index=True)
+    log_id: Mapped[Optional[int]] = mapped_column(
+        BigInteger,
+        ForeignKey("traffic_logs.log_id"),
+        nullable=True,
+        index=True,
+    )
+    error_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    error_message: Mapped[str] = mapped_column(Text, nullable=False)
+    error_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    batch: Mapped[Log_Batch] = relationship("Log_Batch", back_populates="processing_errors")
+    traffic_log: Mapped[Optional[Traffic_Log]] = relationship("Traffic_Log", back_populates="processing_errors")
