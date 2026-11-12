@@ -1,13 +1,10 @@
 import React from 'react';
+import SOCLayout from './SOCLayout';
 
 /**
  * AnalystLayout
- * Application shell tailored for Security Analyst workflows.
+ * Shell for Security Analyst telemetry and alert triage operations.
  */
 export default function AnalystLayout() {
-  return (
-    <div className="analystlayout-container">
-      <h3>AnalystLayout</h3>
-    </div>
-  );
+  return <SOCLayout />;
 }

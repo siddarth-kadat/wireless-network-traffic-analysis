@@ -1,13 +1,10 @@
 import React from 'react';
+import SOCLayout from './SOCLayout';
 
 /**
  * AdminLayout
- * Application shell tailored for Network Administrator capabilities.
+ * Shell for Network Administrator operations.
  */
 export default function AdminLayout() {
-  return (
-    <div className="adminlayout-container">
-      <h3>AdminLayout</h3>
-    </div>
-  );
+  return <SOCLayout />;
 }
