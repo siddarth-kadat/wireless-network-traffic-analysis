@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Data and logs
+backend/logs/*.log
+!backend/logs/.gitkeep
+data/input/*
+!data/input/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/archive/*
+!data/archive/.gitkeep
+data/quarantine/*
+!data/quarantine/.gitkeep
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+*.log
+
+# Environment / IDE
+.env
+.env.local
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
