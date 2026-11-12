@@ -90,3 +90,29 @@ class ProcessingError(NetworkTrafficAnalysisError):
 class ConcurrencyError(NetworkTrafficAnalysisError):
     """Raised when concurrent worker pools encounter fatal execution or synchronization errors."""
     pass
+
+
+# Alert Generation Errors (E4)
+class AlertGenerationError(NetworkTrafficAnalysisError):
+    """Base exception for E4 Alert Generation Engine errors."""
+    pass
+
+
+class AlertValidationError(AlertGenerationError):
+    """Raised when an incoming detection result payload is invalid or malformed."""
+    pass
+
+
+class InvalidSeverityError(AlertGenerationError):
+    """Raised when an unresolvable or invalid severity value is supplied."""
+    pass
+
+
+class DuplicateAlertError(AlertGenerationError):
+    """Raised when an alert generation attempt duplicates an existing result_id."""
+    pass
+
+
+class AlertDispatchError(AlertGenerationError):
+    """Raised when dispatching an alert to E3 storage fails."""
+    pass

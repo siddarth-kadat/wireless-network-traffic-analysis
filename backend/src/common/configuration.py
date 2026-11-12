@@ -25,6 +25,11 @@ class Settings:
     chunk_size: int = int(os.getenv("CHUNK_SIZE", str(DEFAULT_CHUNK_SIZE)))
     zero_copy_enabled: bool = os.getenv("ZERO_COPY_ENABLED", "true").lower() in ("true", "1", "yes")
 
+    # E4 Alert Generation Settings
+    max_alert_retries: int = int(os.getenv("MAX_ALERT_RETRIES", "3"))
+    alert_retry_delay_seconds: float = float(os.getenv("ALERT_RETRY_DELAY_SECONDS", "0.1"))
+    alert_dedup_cache_size: int = int(os.getenv("ALERT_DEDUP_CACHE_SIZE", "10000"))
+
     # Security
     secret_key: str = os.getenv("SECRET_KEY", "change_this_secret_key_in_production")
     algorithm: str = os.getenv("ALGORITHM", "HS256")

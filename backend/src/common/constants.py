@@ -42,6 +42,21 @@ class ProcessingStatus(str, Enum):
     FAILED = "FAILED"
 
 
+class SeverityLevel(str, Enum):
+    """Normalized security alert severity levels."""
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+
+class AlertStatus(str, Enum):
+    """Security alert workflow lifecycle statuses."""
+    NEW = "NEW"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
+    RESOLVED = "RESOLVED"
+
+
 class ProtocolType(str, Enum):
     """Normalized network protocol identifiers."""
     ETHERNET = "ETHERNET"
