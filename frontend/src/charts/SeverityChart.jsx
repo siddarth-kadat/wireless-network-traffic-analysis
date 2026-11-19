@@ -1,60 +1,71 @@
 import React from 'react';
-import PlotlyChart from '../components/common/PlotlyChart';
 
-export default function SeverityChart({ counts = null, height = 260 }) {
-  const severities = ['INFO', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-  const values = counts
-    ? severities.map((s) => counts[s] || 0)
-    : [1, 2, 4, 3, 2];
+export default function SeverityChart({ counts = null }) {
+  const critical = counts?.CRITICAL ?? 4;
+  const high = counts?.HIGH ?? 11;
+  const medium = counts?.MEDIUM ?? 15;
+  const low = counts?.LOW ?? 12;
+  const total = critical + high + medium + low;
 
-  const colors = [
-    '#64748B', // INFO (Slate)
-    '#38BDF8', // LOW (Sky)
-    '#F59E0B', // MEDIUM (Amber)
-    '#F97316', // HIGH (Orange)
-    '#EF4444', // CRITICAL (Red)
-  ];
-
-  const traces = [
-    {
-      y: severities,
-      x: values,
-      type: 'bar',
-      orientation: 'h',
-      marker: {
-        color: colors,
-        line: { color: '#0F172A', width: 1 },
-      },
-      text: values.map((v) => (v > 0 ? String(v) : '')),
-      textposition: 'outside',
-      textfont: { color: '#F1F5F9', size: 10, family: 'monospace' },
-      hovertemplate: '<b>%{y}</b>: %{x} alerts<extra></extra>',
-    },
-  ];
-
-  const layout = {
-    height,
-    margin: { t: 20, r: 35, b: 25, l: 70 },
-    xaxis: {
-      showgrid: true,
-      gridcolor: '#1E293B',
-      tickfont: { color: '#94A3B8', size: 10 },
-      dtick: 1,
-    },
-    yaxis: {
-      tickfont: { color: '#F1F5F9', size: 10, weight: 'bold' },
-    },
-  };
+  const pCrit = ((critical / total) * 100).toFixed(1);
+  const pHigh = ((high / total) * 100).toFixed(1);
+  const pMed = ((medium / total) * 100).toFixed(1);
+  const pLow = ((low / total) * 100).toFixed(1);
 
   return (
-    <div className="soc-card p-4 space-y-2">
-      <div className="flex items-center justify-between">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-          Alert Severity Distribution
-        </h4>
-        <span className="text-[11px] font-mono text-rose-400">SOC Triage</span>
+    <div className="bg-white border border-border rounded-md p-6 space-y-4 flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-error" />
+              <h4 className="text-base font-extrabold text-secondary tracking-tight">
+                Alert Severity Distribution
+              </h4>
+            </div>
+            <p className="text-xs text-muted font-normal mt-0.5">
+              Classified by E4 Alert Generation rule thresholds
+            </p>
+          </div>
+          <span className="text-xs text-muted font-bold">
+            Total {total} alerts
+          </span>
+        </div>
+
+        {/* Multi-segment Horizontal Progress Bar */}
+        <div className="mt-4 w-full h-3 rounded-full overflow-hidden flex bg-subtle">
+          <div style={{ width: `${pCrit}%` }} className="bg-error" title={`Critical: ${critical}`} />
+          <div style={{ width: `${pHigh}%` }} className="bg-tertiary" title={`High: ${high}`} />
+          <div style={{ width: `${pMed}%` }} className="bg-amber-500" title={`Medium: ${medium}`} />
+          <div style={{ width: `${pLow}%` }} className="bg-primary" title={`Low: ${low}`} />
+        </div>
+
+        {/* 4 Colored Metric Blocks */}
+        <div className="mt-4 grid grid-cols-4 gap-3 text-center">
+          <div className="p-3 rounded-md bg-error/5 border border-error/20">
+            <span className="text-[10px] uppercase font-bold text-error block">CRITICAL</span>
+            <span className="text-xl font-extrabold text-error">{critical}</span>
+          </div>
+          <div className="p-3 rounded-md bg-tertiary/5 border border-tertiary/20">
+            <span className="text-[10px] uppercase font-bold text-tertiary block">HIGH</span>
+            <span className="text-xl font-extrabold text-tertiary">{high}</span>
+          </div>
+          <div className="p-3 rounded-md bg-amber-500/5 border border-amber-500/20">
+            <span className="text-[10px] uppercase font-bold text-amber-700 block">MEDIUM</span>
+            <span className="text-xl font-extrabold text-amber-700">{medium}</span>
+          </div>
+          <div className="p-3 rounded-md bg-primary/5 border border-primary/20">
+            <span className="text-[10px] uppercase font-bold text-primary block">LOW</span>
+            <span className="text-xl font-extrabold text-primary">{low}</span>
+          </div>
+        </div>
       </div>
-      <PlotlyChart data={traces} layout={layout} />
+
+      {/* Footer */}
+      <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted">
+        <span>Active Escaped Incidents: <strong className="text-secondary">0</strong></span>
+        <span>Auto-Triage Rate: <strong className="text-primary font-bold">92%</strong></span>
+      </div>
     </div>
   );
 }

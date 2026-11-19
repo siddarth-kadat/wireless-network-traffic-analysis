@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Users as UsersIcon,
   UserPlus,
-  ShieldAlert,
   Trash2,
   RefreshCw,
   Mail,
@@ -74,39 +73,53 @@ export default function Users() {
   const columns = [
     {
       key: 'user_id',
-      label: 'Stakeholder ID',
-      render: (row) => <span className="text-cyan-400 font-bold">{row.user_id}</span>,
+      label: 'STAKEHOLDER ID',
+      render: (row) => <span className="text-primary font-bold font-mono">{row.user_id}</span>,
     },
     {
       key: 'full_name',
-      label: 'Stakeholder Name',
+      label: 'NAME & USERNAME',
       render: (row) => (
         <div className="space-y-0.5">
-          <div className="text-white font-medium">{row.full_name || row.username}</div>
-          <div className="text-[11px] text-slate-500 font-mono">@{row.username}</div>
+          <div className="text-secondary font-bold">{row.full_name}</div>
+          <div className="text-muted text-xs font-mono">@{row.username}</div>
         </div>
       ),
     },
     {
       key: 'role',
-      label: 'Assigned Stakeholder Role',
+      label: 'AUTHORIZATION ROLE',
       render: (row) => <StatusBadge value={row.role} type="role" size="small" />,
     },
     {
       key: 'email',
-      label: 'Contact Email',
-      render: (row) => <span className="text-slate-400 text-xs">{row.email || '—'}</span>,
+      label: 'CONTACT EMAIL',
+      render: (row) => (
+        <span className="text-muted text-xs flex items-center gap-1.5">
+          <Mail className="w-3.5 h-3.5 text-muted" />
+          <span>{row.email || '—'}</span>
+        </span>
+      ),
+    },
+    {
+      key: 'created_at',
+      label: 'PROVISIONED ON',
+      render: (row) => (
+        <span className="text-muted text-xs">
+          {new Date(row.created_at).toLocaleDateString()}
+        </span>
+      ),
     },
     {
       key: 'actions',
-      label: 'Manage',
+      label: 'ACTIONS',
       sortable: false,
       render: (row) => (
         <button
           onClick={() => handleDeleteUser(row.user_id)}
           disabled={row.user_id === currentUser?.user_id}
-          className="p-1.5 rounded hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 disabled:opacity-30 disabled:hover:bg-transparent transition"
-          title="Deactivate Stakeholder Account"
+          className="p-1.5 text-muted hover:text-error hover:bg-error/10 disabled:opacity-20 disabled:cursor-not-allowed rounded-md transition"
+          title="Deactivate stakeholder"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -117,137 +130,133 @@ export default function Users() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 md:p-8 rounded-md bg-white border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <span>Stakeholder User Management</span>
-            <span className="text-xs px-2 py-0.5 rounded bg-cyan-950 border border-cyan-800 text-cyan-400 font-mono">
-              ADMIN ONLY • USER ENTITY
-            </span>
+          <div className="text-xs text-primary font-bold uppercase tracking-wider mb-1">
+            ACCESS CONTROL // STAKEHOLDER MANAGEMENT
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-secondary">
+            User Administration &amp; RBAC
           </h1>
-          <p className="text-xs text-slate-400">
-            RBAC administration for Network Administrators and Security Analysts matching the approved ER diagram.
+          <p className="text-sm text-muted mt-1">
+            Manage provisioned accounts for Network Administrators and Security Analysts.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
-            onClick={fetchUsers}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-700/80 text-slate-300 hover:text-cyan-400 transition"
-            title="Refresh Users"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button
             onClick={() => setIsModalOpen(true)}
-            className="py-2 px-3.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-2 transition"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary-hover active:bg-primary text-white font-bold text-xs transition"
           >
             <UserPlus className="w-4 h-4" />
             <span>Add Stakeholder</span>
           </button>
+          <button
+            onClick={fetchUsers}
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-white hover:bg-subtle border border-border text-secondary font-bold text-xs transition"
+          >
+            <RefreshCw className={`w-4 h-4 text-muted ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
-      {/* Main DataTable */}
+      {/* Main Table */}
       <DataTable
         columns={columns}
         data={users}
         loading={loading}
         pageSize={10}
-        searchPlaceholder="Search stakeholder by name, username, or role..."
-        searchKeys={['user_id', 'username', 'full_name', 'email', 'role']}
+        searchPlaceholder="Filter by Name, Username, Role, or Email..."
       />
 
-      {/* Create Stakeholder Modal */}
+      {/* Add User Modal */}
       {isModalOpen && (
-        <DetailModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          title="Register New Stakeholder"
-          subtitle="Provision a Network Administrator or Security Analyst account"
-          actions={
-            <div className="flex items-center gap-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-secondary/40 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white border border-border rounded-md shadow-card w-full max-w-md p-6 space-y-4 animate-scaleUp">
+            <div className="border-b border-border pb-3 flex items-center justify-between">
+              <h3 className="text-base font-extrabold text-secondary">Provision New Stakeholder</h3>
               <button
-                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="py-2 px-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
+                className="text-muted hover:text-secondary text-sm font-bold"
               >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateUser}
-                disabled={isSubmitting}
-                className="py-2 px-4 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5"
-              >
-                <UserCheck className="w-4 h-4" />
-                <span>Save Stakeholder</span>
+                ✕
               </button>
             </div>
-          }
-        >
-          <form onSubmit={handleCreateUser} className="space-y-4">
+
             {formError && (
-              <div className="p-3 rounded bg-rose-950/60 border border-rose-800 text-xs text-rose-300">
+              <div className="p-3 rounded-md bg-error/10 border border-error/20 text-xs text-error font-medium">
                 {formError}
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                Username Identifier *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                placeholder="e.g. jdoe"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500"
-              />
-            </div>
+            <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-secondary mb-1">Username</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  placeholder="e.g. s_analyst"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:border-primary text-secondary"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                Full Legal Name
-              </label>
-              <input
-                type="text"
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                placeholder="e.g. Jane Doe"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500"
-              />
-            </div>
+              <div>
+                <label className="block font-bold text-secondary mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  placeholder="e.g. Jordan Hayes"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:border-primary text-secondary"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                Stakeholder Email
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="e.g. jane.doe@soc.corp"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500"
-              />
-            </div>
+              <div>
+                <label className="block font-bold text-secondary mb-1">Corporate Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="e.g. j.hayes@corp.net"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:border-primary text-secondary"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                Assigned Stakeholder Role *
-              </label>
-              <select
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500 font-sans"
-              >
-                <option value="Security Analyst">Security Analyst (Monitoring, Triage, Rules)</option>
-                <option value="Network Administrator">Network Administrator (Full Administrative Privileges)</option>
-              </select>
-            </div>
-          </form>
-        </DetailModal>
+              <div>
+                <label className="block font-bold text-secondary mb-1">Assigned Role</label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:border-primary text-secondary"
+                >
+                  <option value="Security Analyst">Security Analyst</option>
+                  <option value="Network Administrator">Network Administrator</option>
+                </select>
+              </div>
+
+              <div className="pt-3 border-t border-border flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 border border-border rounded-md text-secondary font-bold hover:bg-subtle"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-white rounded-md font-bold disabled:opacity-40"
+                >
+                  {isSubmitting ? 'Provisioning...' : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * StatusBadge
- * High-clarity SOC badge for Severity, Processing Status, Role, and Boolean states.
+ * Backlinko Clean Growth badge for Severity, Processing Status, Role, and Boolean states.
  */
 export default function StatusBadge({ value, type = 'status', size = 'normal', showDot = true }) {
   if (value === undefined || value === null) {
@@ -11,56 +11,56 @@ export default function StatusBadge({ value, type = 'status', size = 'normal', s
 
   const raw = String(value).toUpperCase().trim();
   let badgeClass = 'soc-badge-neutral';
-  let dotClass = 'bg-slate-400';
+  let dotClass = 'bg-muted';
   let label = String(value);
 
   if (type === 'severity' || ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(raw)) {
     switch (raw) {
       case 'CRITICAL':
         badgeClass = 'soc-badge-critical';
-        dotClass = 'bg-rose-500 animate-pulse';
+        dotClass = 'bg-error animate-pulse';
         label = 'CRITICAL';
         break;
       case 'HIGH':
         badgeClass = 'soc-badge-high';
-        dotClass = 'bg-amber-500';
+        dotClass = 'bg-tertiary';
         label = 'HIGH';
         break;
       case 'MEDIUM':
         badgeClass = 'soc-badge-medium';
-        dotClass = 'bg-yellow-500';
+        dotClass = 'bg-amber-600';
         label = 'MEDIUM';
         break;
       case 'LOW':
         badgeClass = 'soc-badge-low';
-        dotClass = 'bg-sky-400';
+        dotClass = 'bg-primary';
         label = 'LOW';
         break;
       case 'INFO':
       default:
         badgeClass = 'soc-badge-info';
-        dotClass = 'bg-slate-400';
+        dotClass = 'bg-muted';
         label = 'INFO';
         break;
     }
   } else if (type === 'role') {
     if (raw.includes('ADMIN')) {
-      badgeClass = 'soc-badge-info';
-      dotClass = 'bg-cyan-400';
-      label = 'Administrator';
+      badgeClass = 'soc-badge-low';
+      dotClass = 'bg-primary';
+      label = 'Network Administrator';
     } else {
-      badgeClass = 'soc-badge-neutral';
-      dotClass = 'bg-indigo-400';
+      badgeClass = 'soc-badge-info';
+      dotClass = 'bg-muted';
       label = 'Security Analyst';
     }
   } else if (type === 'boolean' || typeof value === 'boolean') {
     if (value === true || raw === 'TRUE' || raw === 'ENABLED' || raw === 'ACTIVE') {
       badgeClass = 'soc-badge-success';
-      dotClass = 'bg-emerald-400';
+      dotClass = 'bg-primary';
       label = 'Active';
     } else {
       badgeClass = 'soc-badge-neutral';
-      dotClass = 'bg-slate-500';
+      dotClass = 'bg-muted';
       label = 'Disabled';
     }
   } else {
@@ -68,47 +68,59 @@ export default function StatusBadge({ value, type = 'status', size = 'normal', s
     switch (raw) {
       case 'NEW':
         badgeClass = 'soc-badge-critical';
-        dotClass = 'bg-rose-500 animate-pulse';
+        dotClass = 'bg-error animate-pulse';
         label = 'NEW';
         break;
+      case 'TRIAGED':
+      case 'INVESTIGATING':
       case 'ACKNOWLEDGED':
       case 'IN_PROGRESS':
-      case 'PROCESSING':
-        badgeClass = 'soc-badge-info';
-        dotClass = 'bg-sky-400';
+        badgeClass = 'soc-badge-low';
+        dotClass = 'bg-primary';
         label = raw.replace('_', ' ');
+        break;
+      case 'ESCALATED':
+        badgeClass = 'soc-badge-high';
+        dotClass = 'bg-tertiary';
+        label = 'ESCALATED';
         break;
       case 'RESOLVED':
       case 'SUCCESS':
+      case 'COMPLETED':
         badgeClass = 'soc-badge-success';
-        dotClass = 'bg-emerald-400';
-        label = raw;
-        break;
-      case 'PARTIAL_SUCCESS':
-        badgeClass = 'soc-badge-medium';
-        dotClass = 'bg-amber-400';
-        label = 'PARTIAL SUCCESS';
+        dotClass = 'bg-primary';
+        label = 'COMPLETED';
         break;
       case 'FAILED':
       case 'ERROR':
         badgeClass = 'soc-badge-critical';
-        dotClass = 'bg-rose-500';
+        dotClass = 'bg-error';
         label = 'FAILED';
+        break;
+      case 'PROCESSING':
+      case 'PENDING':
+        badgeClass = 'soc-badge-medium';
+        dotClass = 'bg-amber-500 animate-spin';
+        label = raw;
         break;
       default:
         badgeClass = 'soc-badge-neutral';
-        dotClass = 'bg-slate-400';
+        dotClass = 'bg-muted';
         label = raw;
         break;
     }
   }
 
-  const sizeClass = size === 'small' ? 'soc-badge-sm' : '';
+  const isSmall = size === 'small' || size === 'sm';
 
   return (
-    <span className={`soc-badge ${badgeClass} ${sizeClass}`}>
+    <span
+      className={`soc-badge ${badgeClass} ${
+        isSmall ? 'soc-badge-sm' : ''
+      } transition-colors duration-150 inline-flex items-center gap-1.5`}
+    >
       {showDot && <span className={`soc-badge-dot ${dotClass}`} />}
-      {label}
+      <span>{label}</span>
     </span>
   );
 }

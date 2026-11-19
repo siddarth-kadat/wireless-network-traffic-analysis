@@ -1,98 +1,107 @@
 import React from 'react';
-import { Menu, Bell, LogOut, Radio, Database, ShieldCheck } from 'lucide-react';
+import { Search, UploadCloud, Bell, Radio, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getBackendStatus } from '../services/api';
-import { useNavigate, useLocation } from 'react-router-dom';
-
-const ROUTE_TITLES = {
-  '/': 'Overview Dashboard',
-  '/upload': 'PCAP Ingestion Station',
-  '/traffic-logs': 'Traffic Log Explorer',
-  '/alerts': 'Security Alerts Triage',
-  '/detections': 'Detection Results',
-  '/rules': 'Deterministic Rules',
-  '/batches': 'Processing Batches & Diagnostics',
-  '/reports': 'Executive Reports',
-  '/users': 'Stakeholder User Management',
-  '/settings': 'System Settings & Telemetry',
-};
+import { useNavigate } from 'react-router-dom';
 
 export default function Navbar({ onMenuToggle }) {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const isLive = getBackendStatus();
 
-  const currentTitle = ROUTE_TITLES[location.pathname] || 'Cybersecurity SOC Console';
-
   return (
-    <header className="sticky top-0 z-30 h-16 bg-slate-950/90 backdrop-blur-md border-b border-slate-800 px-4 md:px-6 flex items-center justify-between">
-      {/* Left: Mobile Toggle & Page Breadcrumb */}
+    <header className="sticky top-0 z-30 h-16 bg-white border-b border-border px-4 md:px-8 flex items-center justify-between gap-4 select-none">
+      {/* Left: Brand Icon & Telemetry Pill */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuToggle}
-          className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 lg:hidden"
-          aria-label="Toggle navigation menu"
+          className="lg:hidden p-2 rounded-md hover:bg-subtle text-muted"
+          aria-label="Open sidebar"
         >
-          <Menu className="w-5 h-5" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
         </button>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs uppercase font-mono tracking-wider text-slate-500 hidden sm:inline">
-            SOC Console &gt;
-          </span>
-          <h2 className="text-sm font-bold text-white tracking-tight">{currentTitle}</h2>
-        </div>
-      </div>
-
-      {/* Right: Monitoring State, Backend Mode Pill, Notifications, User Menu */}
-      <div className="flex items-center gap-3">
-        {/* Backend API Connectivity Pill (Strictly accurate labeling) */}
         <div
-          title={
-            isLive
-              ? 'FastAPI Backend is online & communicating'
-              : 'Backend is offline or endpoints pending. Displaying verified local demonstration datasets.'
-          }
-          className={`flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-mono border ${
-            isLive
-              ? 'bg-emerald-950/50 text-emerald-400 border-emerald-800'
-              : 'bg-amber-950/50 text-amber-300 border-amber-800'
-          }`}
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 cursor-pointer group"
         >
-          <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-          <span className="font-semibold tracking-wide">
-            {isLive ? 'BACKEND API: LIVE' : 'DEMO MODE: OFFLINE DATASET'}
-          </span>
-        </div>
-
-        {/* Quick Alerts Bell */}
-        <button
-          onClick={() => navigate('/alerts')}
-          className="p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-900 relative transition"
-          title="Inspect Security Alerts"
-        >
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full" />
-        </button>
-
-        {/* User Pill / Role */}
-        <div className="hidden md:flex items-center gap-2 pl-2 border-l border-slate-800 text-xs">
-          <div className="text-right">
-            <p className="font-semibold text-white leading-none">{user?.full_name || user?.username}</p>
-            <p className="text-[10px] text-cyan-400 font-mono mt-0.5">{user?.role}</p>
+          <div className="w-9 h-9 rounded-md bg-primary/10 border border-primary/30 flex items-center justify-center text-primary transition group-hover:bg-primary group-hover:text-white">
+            <Radio className="w-5 h-5" />
+          </div>
+          <div className="leading-tight">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-extrabold text-secondary tracking-tight">W-NTASSOC</span>
+              <span className="text-border">/</span>
+              <span className="text-xs font-bold text-muted tracking-wider uppercase">Console</span>
+            </div>
           </div>
         </div>
 
-        {/* User Logout */}
+        {/* Telemetry Badge */}
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-subtle border border-border text-secondary text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span>4/4 Engines Nominal</span>
+        </div>
+      </div>
+
+      {/* Center: Command / Search Bar */}
+      <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
+        <div className="relative w-full">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+          <input
+            type="text"
+            placeholder="Search captures, IP addresses, detection rules..."
+            className="w-full pl-10 pr-12 py-2 bg-white hover:bg-subtle/50 focus:bg-white border border-border rounded-md text-sm text-secondary placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition font-sans"
+          />
+          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded bg-subtle border border-border text-[11px] font-mono font-medium text-muted">
+            Ctrl+K
+          </kbd>
+        </div>
+      </div>
+
+      {/* Right: Actions, Alerts, and Profile */}
+      <div className="flex items-center gap-3">
+        {/* Upload PCAP CTA */}
         <button
-          onClick={logout}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-slate-900 border border-transparent hover:border-slate-800 transition"
-          title="Sign out of SOC console"
+          onClick={() => navigate('/upload')}
+          className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary-hover active:bg-primary text-white text-sm font-semibold transition"
         >
-          <LogOut className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Sign Out</span>
+          <UploadCloud className="w-4 h-4" />
+          <span className="hidden sm:inline">Upload PCAP</span>
         </button>
+
+        {/* Alerts Pill */}
+        <button
+          onClick={() => navigate('/alerts')}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-subtle border border-border text-secondary text-xs font-bold transition"
+          title="Inspect Security Alerts"
+        >
+          <Bell className="w-4 h-4 text-tertiary" />
+          <span className="text-secondary">4 Alerts</span>
+        </button>
+
+        {/* User Profile Summary */}
+        <div className="flex items-center gap-3 pl-3 border-l border-border">
+          <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">
+            {user?.username?.substring(0, 2).toUpperCase() || 'AR'}
+          </div>
+          <div className="hidden xl:block text-left leading-tight">
+            <p className="text-xs font-bold text-secondary">{user?.full_name || 'Alex Rivera'}</p>
+            <p className="text-[11px] text-muted font-medium">
+              {isAdmin ? 'Network Administrator' : 'Security Analyst'}
+            </p>
+          </div>
+
+          <button
+            onClick={logout}
+            className="p-1.5 text-muted hover:text-error hover:bg-subtle rounded-md transition"
+            title="Log out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </header>
   );

@@ -1,67 +1,60 @@
 import React from 'react';
-import PlotlyChart from '../components/common/PlotlyChart';
 
-export default function AlertTrendChart({ height = 260 }) {
-  const times = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00'];
-  const critical = [0, 0, 1, 3, 0, 1, 0];
-  const high = [1, 0, 2, 4, 1, 0, 1];
-  const medium = [0, 2, 1, 1, 3, 2, 1];
-
-  const traces = [
-    {
-      x: times,
-      y: critical,
-      name: 'Critical',
-      type: 'bar',
-      marker: { color: '#EF4444' },
-    },
-    {
-      x: times,
-      y: high,
-      name: 'High',
-      type: 'bar',
-      marker: { color: '#F97316' },
-    },
-    {
-      x: times,
-      y: medium,
-      name: 'Medium',
-      type: 'bar',
-      marker: { color: '#F59E0B' },
-    },
+export default function AlertTrendChart() {
+  const trends = [
+    { label: '802.11 Deauth Flood (0x00C0 Reason 7)', hits: 142, max: 150, color: 'bg-error' },
+    { label: 'SSID Beacon Spoofing / Randomization', hits: 89, max: 150, color: 'bg-primary' },
+    { label: 'Evil Twin / Karma AP Rogue Probe', hits: 54, max: 150, color: 'bg-secondary' },
+    { label: 'Unregistered Rogue BSSID on Corp Vlan', hits: 41, max: 150, color: 'bg-tertiary' },
+    { label: 'Key Reinstallation / 4-Way Handshake Tampering', hits: 22, max: 150, color: 'bg-muted' },
   ];
 
-  const layout = {
-    height,
-    barmode: 'stack',
-    margin: { t: 25, r: 25, b: 35, l: 35 },
-    xaxis: {
-      showgrid: false,
-      tickfont: { color: '#94A3B8', size: 10 },
-    },
-    yaxis: {
-      showgrid: true,
-      gridcolor: '#1E293B',
-      tickfont: { color: '#94A3B8', size: 10 },
-      dtick: 1,
-    },
-    legend: {
-      orientation: 'h',
-      x: 0,
-      y: 1.15,
-      font: { color: '#94A3B8', size: 10 },
-    },
-  };
-
   return (
-    <div className="soc-card p-4 space-y-2">
-      <div className="flex items-center justify-between">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-          Alert Frequency Trend (Hourly)
-        </h4>
-        <span className="text-[11px] font-mono text-slate-500">Incident Volume</span>
+    <div className="bg-white border border-border rounded-md p-6 space-y-4 flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <h4 className="text-base font-extrabold text-secondary tracking-tight">
+                Suspicious Activity Trends (E2 Engine)
+              </h4>
+            </div>
+            <p className="text-xs text-muted font-normal mt-0.5">
+              Signature heuristic hits aggregated from wireless frame dissector
+            </p>
+          </div>
+          <span className="text-xs text-muted font-bold">
+            Top 5 Vectors
+          </span>
+        </div>
+
+        {/* 5 Horizontal Hit Meters */}
+        <div className="mt-4 space-y-3">
+          {trends.map((t) => (
+            <div key={t.label} className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-secondary font-medium truncate">{t.label}</span>
+                <span className="text-secondary font-bold ml-2">{t.hits} hits</span>
+              </div>
+              <div className="w-full h-2 bg-subtle rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${t.color} rounded-full transition-all duration-300`}
+                  style={{ width: `${(t.hits / t.max) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-      <PlotlyChart data={traces} layout={layout} />
+
+      {/* Footer */}
+      <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted">
+        <span>Engine Detection Interval: <strong className="text-secondary">500ms sliding window</strong></span>
+        <span className="text-primary hover:text-primary-hover cursor-pointer font-bold">
+          Configure Heuristic Weights &rarr;
+        </span>
+      </div>
     </div>
   );
 }

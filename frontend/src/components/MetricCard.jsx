@@ -4,44 +4,80 @@ export default function MetricCard({
   title,
   value,
   subtext,
+  footnote,
   icon: Icon,
   variant = 'default', // 'critical' | 'warning' | 'info' | 'success' | 'default'
   onClick,
 }) {
   const borderVariants = {
-    critical: 'border-l-4 border-l-rose-500',
-    warning: 'border-l-4 border-l-amber-500',
-    info: 'border-l-4 border-l-cyan-500',
-    success: 'border-l-4 border-l-emerald-500',
-    default: 'border-l-4 border-l-slate-600',
+    critical: 'border-error/40 hover:border-error',
+    warning: 'border-tertiary/40 hover:border-tertiary',
+    info: 'border-border hover:border-muted',
+    success: 'border-primary/40 hover:border-primary',
+    default: 'border-border hover:border-muted',
   };
 
   const iconVariants = {
-    critical: 'text-rose-400 bg-rose-500/10',
-    warning: 'text-amber-400 bg-amber-500/10',
-    info: 'text-cyan-400 bg-cyan-500/10',
-    success: 'text-emerald-400 bg-emerald-500/10',
-    default: 'text-slate-300 bg-slate-800',
+    critical: 'text-error bg-error/10',
+    warning: 'text-tertiary bg-tertiary/10',
+    info: 'text-primary bg-primary/10',
+    success: 'text-primary bg-primary/10',
+    default: 'text-muted bg-subtle',
+  };
+
+  const titleVariants = {
+    critical: 'text-error',
+    warning: 'text-tertiary',
+    info: 'text-muted',
+    success: 'text-primary',
+    default: 'text-muted',
+  };
+
+  const valueVariants = {
+    critical: 'text-error',
+    warning: 'text-secondary',
+    info: 'text-secondary',
+    success: 'text-secondary',
+    default: 'text-secondary',
   };
 
   return (
     <div
       onClick={onClick}
-      className={`soc-card flex items-center justify-between p-5 transition-all duration-200 hover:border-slate-600 ${
+      className={`bg-white border rounded-md p-5 flex flex-col justify-between transition-all duration-150 ${
         borderVariants[variant] || borderVariants.default
-      } ${onClick ? 'cursor-pointer hover:bg-slate-800/40' : ''}`}
+      } ${onClick ? 'cursor-pointer hover:bg-subtle/30' : ''}`}
     >
-      <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{title}</p>
-        <p className="text-2xl font-bold tracking-tight text-white font-mono">{value}</p>
-        {subtext && <p className="text-xs text-slate-400">{subtext}</p>}
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <p className={`text-xs font-bold uppercase tracking-wider ${titleVariants[variant] || 'text-muted'}`}>
+            {title}
+          </p>
+          {Icon && (
+            <div className={`p-2 rounded-md ${iconVariants[variant] || iconVariants.default}`}>
+              <Icon className="w-4 h-4" />
+            </div>
+          )}
+        </div>
+
+        <div className="mt-3">
+          <span className={`text-3xl font-extrabold tracking-tight ${valueVariants[variant] || 'text-secondary'}`}>
+            {value}
+          </span>
+        </div>
+
+        {subtext && (
+          <p className="mt-1 text-xs text-muted font-medium">
+            {subtext}
+          </p>
+        )}
       </div>
-      {Icon && (
-        <div className={`p-3 rounded-lg flex items-center justify-center ${iconVariants[variant] || iconVariants.default}`}>
-          <Icon className="w-6 h-6" />
+
+      {footnote && (
+        <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px] text-muted">
+          <span>{footnote}</span>
         </div>
       )}
     </div>
   );
 }
-

@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import DataTable from '../components/DataTable';
 import DetailModal from '../components/DetailModal';
-import StatusBadge from '../components/StatusBadge';
 import { logService } from '../services/logService';
 
 export default function TrafficLogs() {
@@ -46,228 +45,167 @@ export default function TrafficLogs() {
   const columns = [
     {
       key: 'log_id',
-      label: 'Log ID',
-      render: (row) => <span className="text-cyan-400 font-bold">{row.log_id}</span>,
+      label: 'LOG ID',
+      render: (row) => <span className="text-primary font-bold font-mono">{row.log_id}</span>,
     },
     {
       key: 'timestamp',
-      label: 'Timestamp',
+      label: 'TIMESTAMP',
       render: (row) => (
-        <span className="text-slate-400 text-[11px]">
+        <span className="text-muted font-mono text-xs">
           {new Date(row.timestamp).toLocaleTimeString()}
         </span>
       ),
     },
     {
       key: 'protocol',
-      label: 'Protocol',
+      label: 'PROTOCOL',
       render: (row) => (
-        <span className="px-2 py-0.5 rounded text-[11px] bg-slate-900 border border-slate-700 text-slate-200">
+        <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-subtle text-secondary border border-border">
           {row.protocol}
         </span>
       ),
     },
     {
       key: 'source_address',
-      label: 'Source Addr / MAC',
+      label: 'SOURCE ADDR / MAC',
       render: (row) => (
         <div className="space-y-0.5">
-          <div className="text-slate-200">{row.source_address || '—'}</div>
-          <div className="text-slate-500 text-[10px]">{row.source_mac || '—'}</div>
+          <div className="text-secondary font-bold">{row.source_address || '—'}</div>
+          <div className="text-muted text-[11px] font-mono">{row.source_mac || '—'}</div>
         </div>
       ),
     },
     {
       key: 'destination_address',
-      label: 'Destination Addr / MAC',
+      label: 'DESTINATION ADDR / MAC',
       render: (row) => (
         <div className="space-y-0.5">
-          <div className="text-slate-200">{row.destination_address || '—'}</div>
-          <div className="text-slate-500 text-[10px]">{row.destination_mac || '—'}</div>
+          <div className="text-secondary font-bold">{row.destination_address || '—'}</div>
+          <div className="text-muted text-[11px] font-mono">{row.destination_mac || '—'}</div>
         </div>
       ),
     },
     {
-      key: 'batch_id',
-      label: 'Batch ID',
-      render: (row) => <span className="text-slate-400 text-[11px]">{row.batch_id}</span>,
+      key: 'packet_length',
+      label: 'LENGTH',
+      render: (row) => <span className="font-mono text-secondary font-medium">{row.packet_length} B</span>,
+    },
+    {
+      key: 'ssid',
+      label: 'WIRELESS SSID',
+      render: (row) => (
+        <span className="font-medium text-secondary">
+          {row.ssid || <span className="text-muted italic">Non-Wireless</span>}
+        </span>
+      ),
     },
     {
       key: 'actions',
-      label: 'Inspect',
+      label: 'ACTIONS',
       sortable: false,
       render: (row) => (
         <button
-          onClick={() => setSelectedLog(row)}
-          className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition"
-          title="Inspect Packet Structure"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedLog(row);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-white hover:bg-subtle border border-border text-secondary font-bold text-xs transition"
         >
-          <Eye className="w-4 h-4" />
+          <Eye className="w-3.5 h-3.5 text-muted" />
+          <span>Inspect</span>
         </button>
       ),
     },
   ];
 
-  const handleExportCSV = () => {
-    if (!logs.length) return;
-    const headers = ['log_id', 'batch_id', 'timestamp', 'source_address', 'destination_address', 'source_mac', 'destination_mac', 'protocol'];
-    const rows = logs.map((l) =>
-      headers.map((h) => JSON.stringify(l[h] || '')).join(',')
-    );
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `traffic_logs_export_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 md:p-8 rounded-md bg-white border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <span>Traffic Log Explorer</span>
-            <span className="text-xs px-2 py-0.5 rounded bg-cyan-950 border border-cyan-800 text-cyan-400 font-mono">
-              TRAFFIC_LOG ENTITY
-            </span>
+          <div className="text-xs text-primary font-bold uppercase tracking-wider mb-1">
+            NETWORK MONITORING // TRAFFIC EXPLORER
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-secondary">
+            Extracted Traffic Records
           </h1>
-          <p className="text-xs text-slate-400">
-            Parsed packet records generated by E1 Log Processing Engine matching the approved 7-entity relational schema.
+          <p className="text-sm text-muted mt-1">
+            Normalized frame features dissected by E1 Log Processing Engine and stored in SQLite E3.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={fetchLogs}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-700/80 text-slate-300 hover:text-cyan-400 transition"
-            title="Refresh logs"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-white hover:bg-subtle border border-border text-secondary font-bold text-xs transition"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={handleExportCSV}
-            className="py-2 px-3.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-mono flex items-center gap-2 transition"
-          >
-            <Download className="w-4 h-4 text-cyan-400" />
-            <span>Export CSV</span>
+            <RefreshCw className={`w-4 h-4 text-muted ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
-      {/* Protocol Quick Filters */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        <span className="text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-1.5 mr-2">
-          <Filter className="w-3.5 h-3.5" />
-          <span>Protocol:</span>
-        </span>
+      {/* Protocol Filter Tabs */}
+      <div className="flex flex-wrap items-center gap-2">
         {protocols.map((proto) => (
           <button
             key={proto}
             onClick={() => setSelectedProtocol(proto)}
-            className={`px-3 py-1.5 rounded-lg font-mono transition ${selectedProtocol === proto
-                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-bold'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-              }`}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${
+              selectedProtocol === proto
+                ? 'bg-primary text-white'
+                : 'bg-white hover:bg-subtle border border-border text-secondary'
+            }`}
           >
             {proto}
           </button>
         ))}
       </div>
 
-      {/* Main DataTable */}
+      {/* Main Table */}
       <DataTable
         columns={columns}
         data={filteredLogs}
         loading={loading}
-        pageSize={10}
-        searchPlaceholder="Search by IP, MAC, protocol or batch ID..."
-        searchKeys={['log_id', 'source_address', 'destination_address', 'source_mac', 'destination_mac', 'protocol', 'batch_id']}
+        pageSize={12}
         onRowClick={(row) => setSelectedLog(row)}
+        searchPlaceholder="Search IP, MAC, SSID, Protocol, or Log ID..."
       />
 
-      {/* Deep Packet Dissection Modal */}
-      {selectedLog && (
-        <DetailModal
-          isOpen={!!selectedLog}
-          onClose={() => setSelectedLog(null)}
-          title={`Packet Dissection: ${selectedLog.log_id}`}
-          subtitle={`Batch: ${selectedLog.batch_id} • Ingested: ${new Date(selectedLog.timestamp).toLocaleString()}`}
-          rawJson={selectedLog}
-          actions={
-            <button
-              onClick={() => setSelectedLog(null)}
-              className="py-1.5 px-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-            >
-              Done
-            </button>
-          }
-        >
-          <div className="space-y-4">
-            {/* Wireshark-style protocol layer cards */}
-            <div className="p-4 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-                <Radio className="w-4 h-4" />
-                <span>Link Layer / Wireless 802.11 Frame Header</span>
-              </h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs font-mono">
-                <div>
-                  <span className="text-slate-500 block">Link Layer:</span>
-                  <span className="text-white">{selectedLog.log_details?.link_layer_type || 'IEEE 802.11'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Frame Type:</span>
-                  <span className="text-white">{selectedLog.log_details?.wireless?.frame_type || 'Management'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Frame Subtype:</span>
-                  <span className="text-amber-400">{selectedLog.log_details?.wireless?.frame_subtype || 'Deauthentication'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">BSSID:</span>
-                  <span className="text-white">{selectedLog.log_details?.wireless?.bssid || selectedLog.destination_mac}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">SSID:</span>
-                  <span className="text-white">{selectedLog.log_details?.wireless?.ssid || 'CorpEnterpriseWPA3'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Signal Strength:</span>
-                  <span className="text-cyan-400">{selectedLog.log_details?.wireless?.signal_strength || -68} dBm</span>
-                </div>
-              </div>
+      {/* Inspect Detail Modal */}
+      <DetailModal
+        isOpen={!!selectedLog}
+        onClose={() => setSelectedLog(null)}
+        title={`Packet Log Dissection: ${selectedLog?.log_id}`}
+        subtitle={`Captured at ${selectedLog?.timestamp} by E1 Log Processing Engine`}
+        data={selectedLog}
+      >
+        {selectedLog && (
+          <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="p-3.5 rounded-md bg-subtle border border-border">
+              <span className="text-muted block text-[11px]">SOURCE HARDWARE / IP</span>
+              <p className="text-secondary font-bold font-mono text-sm mt-0.5">{selectedLog.source_address || 'None'}</p>
+              <p className="text-muted text-[11px] font-mono">{selectedLog.source_mac}</p>
             </div>
-
-            <div className="p-4 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                <Layers className="w-4 h-4" />
-                <span>Network & Transport Addressing</span>
-              </h4>
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                <div>
-                  <span className="text-slate-500 block">Source IP:</span>
-                  <span className="text-white">{selectedLog.source_address || 'N/A'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Destination IP:</span>
-                  <span className="text-white">{selectedLog.destination_address || 'N/A'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Source Port:</span>
-                  <span className="text-white">{selectedLog.log_details?.source_port || '—'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Destination Port:</span>
-                  <span className="text-white">{selectedLog.log_details?.destination_port || '—'}</span>
-                </div>
-              </div>
+            <div className="p-3.5 rounded-md bg-subtle border border-border">
+              <span className="text-muted block text-[11px]">DESTINATION HARDWARE / IP</span>
+              <p className="text-secondary font-bold font-mono text-sm mt-0.5">{selectedLog.destination_address || 'None'}</p>
+              <p className="text-muted text-[11px] font-mono">{selectedLog.destination_mac}</p>
+            </div>
+            <div className="p-3.5 rounded-md bg-subtle border border-border">
+              <span className="text-muted block text-[11px]">WIRELESS SSID &amp; BSSID</span>
+              <p className="text-secondary font-bold text-sm mt-0.5">{selectedLog.ssid || 'N/A'}</p>
+              <p className="text-muted text-[11px] font-mono">{selectedLog.bssid || 'N/A'}</p>
+            </div>
+            <div className="p-3.5 rounded-md bg-subtle border border-border">
+              <span className="text-muted block text-[11px]">CHANNEL &amp; SIGNAL</span>
+              <p className="text-secondary font-bold text-sm mt-0.5">Channel {selectedLog.channel || 'Auto'}</p>
+              <p className="text-muted text-[11px]">{selectedLog.signal_strength ? `${selectedLog.signal_strength} dBm` : 'N/A'}</p>
             </div>
           </div>
-        </DetailModal>
-      )}
+        )}
+      </DetailModal>
     </div>
   );
 }

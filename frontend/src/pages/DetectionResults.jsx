@@ -6,8 +6,6 @@ import {
   RefreshCw,
   ShieldAlert,
   Sliders,
-  CheckCircle,
-  FileText,
 } from 'lucide-react';
 import DataTable from '../components/DataTable';
 import DetailModal from '../components/DetailModal';
@@ -18,7 +16,7 @@ export default function DetectionResults() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedResult, setSelectedResult] = useState(null);
-  const [suspiciousFilter, setSuspiciousFilter] = useState('ALL'); // 'ALL' | 'TRUE' | 'FALSE'
+  const [suspiciousFilter, setSuspiciousFilter] = useState('ALL');
 
   const fetchResults = async () => {
     setLoading(true);
@@ -45,35 +43,35 @@ export default function DetectionResults() {
   const columns = [
     {
       key: 'result_id',
-      label: 'Result ID',
-      render: (row) => <span className="text-cyan-400 font-bold">{row.result_id}</span>,
+      label: 'RESULT ID',
+      render: (row) => <span className="text-primary font-bold font-mono">{row.result_id}</span>,
     },
     {
       key: 'detection_timestamp',
-      label: 'Timestamp',
+      label: 'TIMESTAMP',
       render: (row) => (
-        <span className="text-slate-400 text-[11px]">
+        <span className="text-muted text-xs">
           {new Date(row.detection_timestamp).toLocaleTimeString()}
         </span>
       ),
     },
     {
       key: 'rule_id',
-      label: 'Triggered Rule',
+      label: 'TRIGGERED RULE',
       render: (row) => (
-        <span className="px-2 py-0.5 rounded text-[11px] bg-slate-900 border border-slate-700 text-amber-300 font-bold">
+        <span className="px-2.5 py-0.5 rounded-full text-xs bg-subtle text-secondary border border-border font-bold font-mono">
           {row.rule_id}
         </span>
       ),
     },
     {
       key: 'log_id',
-      label: 'Associated Log ID',
-      render: (row) => <span className="text-slate-300 text-[11px]">{row.log_id}</span>,
+      label: 'LOG ID',
+      render: (row) => <span className="text-secondary font-mono text-xs">{row.log_id}</span>,
     },
     {
       key: 'is_suspicious',
-      label: 'Suspicious Verdict',
+      label: 'VERDICT',
       render: (row) => (
         <StatusBadge
           value={row.is_suspicious ? 'CRITICAL' : 'RESOLVED'}
@@ -84,27 +82,30 @@ export default function DetectionResults() {
     },
     {
       key: 'evidence_summary',
-      label: 'Evidence Summary',
+      label: 'EVIDENCE SUMMARY',
       render: (row) => {
         const ev = row.evidence_data || {};
         return (
-          <span className="text-slate-400 text-xs truncate max-w-xs block">
-            {ev.reason || (ev.detected_rate ? `Rate: ${ev.detected_rate}/s (thresh ${ev.threshold})` : 'Threshold evaluated')}
-          </span>
+          <div className="text-xs text-secondary max-w-sm truncate">
+            {ev.reason || ev.description || (row.is_suspicious ? 'Threshold Breached' : 'Nominal')}
+          </div>
         );
       },
     },
     {
       key: 'actions',
-      label: 'Inspect',
+      label: 'ACTIONS',
       sortable: false,
       render: (row) => (
         <button
-          onClick={() => setSelectedResult(row)}
-          className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition"
-          title="Inspect Evidence Contract"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedResult(row);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-white hover:bg-subtle border border-border text-secondary font-bold text-xs transition"
         >
-          <Eye className="w-4 h-4" />
+          <Eye className="w-3.5 h-3.5 text-muted" />
+          <span>Evidence</span>
         </button>
       ),
     },
@@ -113,129 +114,97 @@ export default function DetectionResults() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 md:p-8 rounded-md bg-white border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <span>Detection Results</span>
-            <span className="text-xs px-2 py-0.5 rounded bg-cyan-950 border border-cyan-800 text-cyan-400 font-mono">
-              DETECTION_RESULT ENTITY
-            </span>
+          <div className="text-xs text-primary font-bold uppercase tracking-wider mb-1">
+            THREAT DETECTION // E2 SUSPICIOUS PATTERN ENGINE
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-secondary">
+            Detection Results &amp; Vector Breaches
           </h1>
-          <p className="text-xs text-slate-400">
-            Outcomes from E2 Suspicious Pattern Detection Engine forwarded to E4 for Alert Generation.
+          <p className="text-sm text-muted mt-1">
+            Deterministic evaluations generated by E2 comparing parsed traffic logs against defined detection rules.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={fetchResults}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-700/80 text-slate-300 hover:text-cyan-400 transition"
-            title="Refresh Detection Results"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-white hover:bg-subtle border border-border text-secondary font-bold text-xs transition"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-muted ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 text-xs">
-        <span className="text-slate-500 font-semibold uppercase tracking-wider mr-2">
-          Verdict Filter:
-        </span>
+      <div className="flex items-center gap-2">
         {[
-          { id: 'ALL', label: 'All Results' },
-          { id: 'TRUE', label: 'Suspicious Threats' },
-          { id: 'FALSE', label: 'Benign Traffic' },
+          { id: 'ALL', label: 'All Evaluations' },
+          { id: 'TRUE', label: 'Suspicious Breaches Only' },
+          { id: 'FALSE', label: 'Benign Pass-through' },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setSuspiciousFilter(tab.id)}
-            className={`px-3 py-1.5 rounded-lg font-mono transition ${
-              suspiciousFilter === tab.id
-                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-bold'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-            }`}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${suspiciousFilter === tab.id
+                ? 'bg-primary text-white'
+                : 'bg-white hover:bg-subtle border border-border text-secondary'
+              }`}
           >
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* Main DataTable */}
+      {/* Main Table */}
       <DataTable
         columns={columns}
         data={filteredResults}
         loading={loading}
-        pageSize={10}
-        searchPlaceholder="Search result ID, rule ID, or log ID..."
-        searchKeys={['result_id', 'rule_id', 'log_id']}
+        pageSize={12}
         onRowClick={(row) => setSelectedResult(row)}
+        searchPlaceholder="Filter by Result ID, Rule ID, or Evidence..."
       />
 
-      {/* Inspection Modal */}
-      {selectedResult && (
-        <DetailModal
-          isOpen={!!selectedResult}
-          onClose={() => setSelectedResult(null)}
-          title={`Detection Result: ${selectedResult.result_id}`}
-          subtitle={`Evaluated At: ${new Date(selectedResult.detection_timestamp).toLocaleString()}`}
-          badge={
-            <StatusBadge
-              value={selectedResult.is_suspicious ? 'CRITICAL' : 'RESOLVED'}
-              type="severity"
-            />
-          }
-          rawJson={selectedResult}
-          actions={
-            <button
-              onClick={() => setSelectedResult(null)}
-              className="py-1.5 px-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-            >
-              Done
-            </button>
-          }
-        >
+      {/* Detail Modal */}
+      <DetailModal
+        isOpen={!!selectedResult}
+        onClose={() => setSelectedResult(null)}
+        title={`E2 Detection Evidence: ${selectedResult?.result_id}`}
+        subtitle={`Evaluated against Rule ${selectedResult?.rule_id}`}
+        data={selectedResult}
+      >
+        {selectedResult && (
           <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
-                <Sliders className="w-4 h-4" />
-                <span>Deterministic Rule Evaluation</span>
-              </h4>
-              <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                <div>
-                  <span className="text-slate-500 block">Matched Rule ID:</span>
-                  <span className="text-white font-bold">{selectedResult.rule_id}</span>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-3.5 rounded-md bg-subtle border border-border">
+                <span className="text-muted block text-[11px]">VERDICT</span>
+                <div className="mt-1">
+                  <StatusBadge
+                    value={selectedResult.is_suspicious ? 'CRITICAL' : 'RESOLVED'}
+                    type="severity"
+                  />
                 </div>
-                <div>
-                  <span className="text-slate-500 block">Associated Traffic Log:</span>
-                  <span className="text-cyan-400 font-bold">{selectedResult.log_id}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Threat Classification:</span>
-                  <span className={selectedResult.is_suspicious ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}>
-                    {selectedResult.is_suspicious ? 'CONFIRMED SUSPICIOUS PATTERN' : 'BENIGN EVALUATION'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Engine Pipeline:</span>
-                  <span className="text-slate-300">E2 Pattern Engine &rarr; E4 Alert Engine</span>
-                </div>
+              </div>
+              <div className="p-3.5 rounded-md bg-subtle border border-border">
+                <span className="text-muted block text-[11px]">ASSOCIATED LOG ID</span>
+                <p className="text-secondary font-bold font-mono text-sm mt-1">{selectedResult.log_id}</p>
               </div>
             </div>
 
-            <div className="p-4 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4" />
-                <span>Extracted Forensic Evidence</span>
-              </h4>
-              <pre className="text-xs font-mono text-cyan-300 whitespace-pre-wrap">
+            <div className="p-4 rounded-md border border-border bg-white space-y-2">
+              <span className="text-xs font-bold text-secondary uppercase tracking-wider block">
+                Evidence Attributes
+              </span>
+              <pre className="p-3 rounded-md bg-subtle text-secondary font-mono text-xs overflow-x-auto">
                 {JSON.stringify(selectedResult.evidence_data, null, 2)}
               </pre>
             </div>
           </div>
-        </DetailModal>
-      )}
+        )}
+      </DetailModal>
     </div>
   );
 }
-

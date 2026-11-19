@@ -1,88 +1,94 @@
 import React from 'react';
 import PlotlyChart from '../components/common/PlotlyChart';
-import { getBackendStatus } from '../services/api';
 
-export default function TrafficChart({ data = null, height = 300 }) {
-  const isLive = getBackendStatus();
-
-  // Baseline timeseries
-  const timestamps = data?.timestamps || [
-    '10:00:00', '10:05:00', '10:10:00', '10:15:00', '10:20:00',
-    '10:25:00', '10:30:00', '10:35:00', '10:40:00', '10:45:00',
-    '10:50:00', '10:55:00', '11:00:00'
+export default function TrafficChart({ height = 240 }) {
+  const timestamps = [
+    '08:00 UTC', '10:00 UTC', '12:00 UTC', '14:00 (PEAK)', '16:00 UTC', '18:00 UTC', '20:00 UTC'
   ];
-  const packetRates = data?.packetRates || [120, 145, 132, 580, 890, 420, 180, 210, 340, 290, 195, 230, 210];
-  const byteRates = data?.byteRates || [15, 18, 17, 72, 110, 52, 22, 26, 42, 36, 24, 28, 26];
+
+  // 5.0 GHz high-throughput band
+  const band5GHz = [45, 52, 78, 124.6, 85, 62, 58];
+  // 2.4 GHz legacy IoT band
+  const band24GHz = [28, 32, 35, 58, 42, 36, 31];
 
   const traces = [
     {
       x: timestamps,
-      y: packetRates,
-      name: 'Packets / sec',
+      y: band5GHz,
+      name: '5.0 GHz (802.11ac/ax)',
       type: 'scatter',
-      mode: 'lines+markers',
-      line: { color: '#00E5FF', width: 2, shape: 'spline' },
+      mode: 'lines',
+      line: { color: '#00BC98', width: 2.5, shape: 'spline' },
       fill: 'tozeroy',
-      fillcolor: 'rgba(0, 229, 255, 0.08)',
-      marker: { size: 5, color: '#00E5FF' },
+      fillcolor: 'rgba(0, 188, 152, 0.12)',
     },
     {
       x: timestamps,
-      y: byteRates,
-      name: 'Throughput (KB/s)',
-      yaxis: 'y2',
+      y: band24GHz,
+      name: '2.4 GHz (legacy/IoT)',
       type: 'scatter',
       mode: 'lines',
-      line: { color: '#818CF8', width: 2, dash: 'dot', shape: 'spline' },
+      line: { color: '#424348', width: 2, dash: 'dot', shape: 'spline' },
+      fill: 'tozeroy',
+      fillcolor: 'rgba(66, 67, 72, 0.06)',
     },
   ];
 
   const layout = {
     height,
-    margin: { t: 25, r: 45, b: 35, l: 45 },
+    margin: { t: 15, r: 20, b: 30, l: 35 },
+    showlegend: false,
     xaxis: {
-      title: 'Time Window (UTC)',
       showgrid: true,
-      gridcolor: '#1E293B',
-      tickfont: { color: '#94A3B8', size: 10 },
-      titlefont: { color: '#94A3B8', size: 11 },
+      gridcolor: '#EEF2F7',
+      tickfont: { color: '#424348', size: 10 },
     },
     yaxis: {
-      title: 'Packets / Sec',
       showgrid: true,
-      gridcolor: '#1E293B',
-      tickfont: { color: '#00E5FF', size: 10 },
-      titlefont: { color: '#00E5FF', size: 11 },
-    },
-    yaxis2: {
-      title: 'KB / Sec',
-      overlaying: 'y',
-      side: 'right',
-      showgrid: false,
-      tickfont: { color: '#818CF8', size: 10 },
-      titlefont: { color: '#818CF8', size: 11 },
-    },
-    legend: {
-      orientation: 'h',
-      x: 0,
-      y: 1.15,
-      font: { color: '#94A3B8', size: 11 },
+      gridcolor: '#EEF2F7',
+      tickfont: { color: '#424348', size: 10 },
+      ticksuffix: 'k',
     },
   };
 
   return (
-    <div className="soc-card p-4 space-y-2">
-      <div className="flex items-center justify-between">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-          Temporal Network Traffic Rate
-        </h4>
-        <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-          isLive ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800' : 'bg-slate-900 text-slate-400 border-slate-700'
-        }`}>
-          {isLive ? 'Live Stream' : 'Sample Telemetry'}
-        </span>
+    <div className="bg-white border border-border rounded-md p-6 space-y-3 flex flex-col justify-between">
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <h4 className="text-base font-extrabold text-secondary tracking-tight">
+                Network Traffic Over Time
+              </h4>
+            </div>
+            <p className="text-xs text-muted font-normal mt-0.5">
+              Live packet ingress distribution broken down by 2.4 GHz vs 5.0 GHz wireless spectrum
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold">
+              5.0 GHz (802.11ac)
+            </span>
+            <span className="px-2.5 py-1 rounded-full bg-subtle text-secondary border border-border font-medium">
+              2.4 GHz (IoT)
+            </span>
+            <span className="px-2.5 py-1 rounded-full bg-secondary text-white font-bold">
+              Peak: 124.6k pkt/s
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <PlotlyChart data={traces} layout={layout} style={{ width: '100%', height: `${height}px` }} />
+        </div>
       </div>
-      <PlotlyChart data={traces} layout={layout} />
+
+      <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted">
+        <span>Channel Width: 20/40/80 MHz Adaptive</span>
+        <span className="text-secondary font-bold">Throughput: 98.4 Mbps Avg</span>
+      </div>
     </div>
   );
 }

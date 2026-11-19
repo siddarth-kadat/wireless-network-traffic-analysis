@@ -1,53 +1,55 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  ShieldAlert,
   LayoutDashboard,
   UploadCloud,
   FileText,
-  AlertTriangle,
-  Search,
-  Sliders,
   Layers,
+  Search,
+  AlertTriangle,
+  Sliders,
   FileBarChart,
   Users,
   Settings,
-  ChevronRight,
-  ShieldCheck,
+  Radio,
   RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import StatusBadge from './StatusBadge';
 
 export default function Sidebar({ isOpen, onClose }) {
   const { user, isAdmin, switchRole } = useAuth();
 
   const navItems = [
     {
-      group: 'SOC Operations',
+      group: 'OVERVIEW',
       items: [
-        { path: '/', label: 'Overview Dashboard', icon: LayoutDashboard },
-        { path: '/upload', label: 'PCAP Ingestion Station', icon: UploadCloud },
-        { path: '/traffic-logs', label: 'Traffic Log Explorer', icon: FileText },
+        { path: '/', label: 'Overview', icon: LayoutDashboard },
       ],
     },
     {
-      group: 'Threat Detection & Triage',
+      group: 'NETWORK MONITORING',
       items: [
-        { path: '/alerts', label: 'Security Alerts Triage', icon: AlertTriangle },
-        { path: '/detections', label: 'Detection Results', icon: Search },
-        { path: '/rules', label: 'Deterministic Rules', icon: Sliders },
-      ],
-    },
-    {
-      group: 'System & Administration',
-      items: [
+        { path: '/upload', label: 'PCAP Ingestion', icon: UploadCloud },
+        { path: '/traffic-logs', label: 'Traffic Explorer', icon: FileText },
         { path: '/batches', label: 'Processing Batches', icon: Layers },
-        { path: '/reports', label: 'Executive Reports', icon: FileBarChart },
+      ],
+    },
+    {
+      group: 'THREAT DETECTION',
+      items: [
+        { path: '/detections', label: 'Detections', icon: Search },
+        { path: '/alerts', label: 'Alerts Triage', icon: AlertTriangle, badge: '4' },
+        { path: '/rules', label: 'Rules Engine', icon: Sliders },
+      ],
+    },
+    {
+      group: 'ADMINISTRATION',
+      items: [
+        { path: '/reports', label: 'Reports', icon: FileBarChart },
         ...(isAdmin
-          ? [{ path: '/users', label: 'User Management', icon: Users }]
+          ? [{ path: '/users', label: 'Users', icon: Users }]
           : []),
-        { path: '/settings', label: 'System & Telemetry', icon: Settings },
+        { path: '/settings', label: 'Settings', icon: Settings },
       ],
     },
   ];
@@ -65,89 +67,110 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-secondary/30 backdrop-blur-xs lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-slate-950 border-r border-slate-800/80 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-56 bg-white border-r border-border flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand Header */}
-        <div className="p-4 border-b border-slate-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
-              <ShieldAlert className="w-6 h-6" />
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white">
+              <Radio className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-sm font-bold tracking-wider uppercase text-white flex items-center gap-1.5">
-                <span>W-NTAAS</span>
-                <span className="text-[10px] px-1.5 py-0.2 bg-cyan-950 border border-cyan-800 text-cyan-400 rounded">
-                  SOC
-                </span>
+              <div className="text-xs font-extrabold tracking-tight text-secondary">
+                W-NTASSOC <span className="text-[10px] text-primary font-bold">v2.4</span>
               </div>
-              <p className="text-[11px] text-slate-400">Wireless Traffic Analyzer</p>
+              <div className="text-[10px] text-muted font-medium">SOC Analytics Engine</div>
+            </div>
+          </div>
+
+          {/* 4-Engine Mini Status Box */}
+          <div className="mt-3 p-2 rounded-md bg-subtle border border-border">
+            <div className="flex items-center justify-between text-[10px] font-bold text-muted uppercase tracking-wider mb-1">
+              <span>Engines</span>
+              <span className="text-primary">All Active</span>
+            </div>
+            <div className="grid grid-cols-4 gap-1 text-[9px] font-mono text-center">
+              <span className="px-1 py-0.5 rounded bg-white border border-border text-primary font-bold" title="E1: Log Processing Engine">E1:OK</span>
+              <span className="px-1 py-0.5 rounded bg-white border border-border text-primary font-bold" title="E2: Suspicious Pattern Detection">E2:ACT</span>
+              <span className="px-1 py-0.5 rounded bg-white border border-border text-primary font-bold" title="E3: Log & Alert Storage">E3:SYNC</span>
+              <span className="px-1 py-0.5 rounded bg-white border border-border text-tertiary font-bold" title="E4: Alert Generation">E4:RDY</span>
             </div>
           </div>
         </div>
 
-        {/* Navigation Sections */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        {/* Navigation Link Groups */}
+        <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
           {navItems.map((group) => (
-            <div key={group.group} className="space-y-1">
-              <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            <div key={group.group}>
+              <p className="px-3 text-[11px] font-bold text-secondary uppercase tracking-wider mb-1.5">
                 {group.group}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={onClose}
+                      className={({ isActive }) =>
+                        `flex items-center justify-between px-3 py-2 rounded-md text-xs font-semibold transition ${
+                          isActive
+                            ? 'bg-subtle text-primary border-l-3 border-primary'
+                            : 'text-muted hover:text-secondary hover:bg-subtle/60'
+                        }`
+                      }
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-4 h-4 flex-shrink-0" />
+                        <span>{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-tertiary text-white">
+                          {item.badge}
+                        </span>
+                      )}
+                    </NavLink>
+                  );
+                })}
               </div>
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => onClose && onClose()}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all group ${
-                        isActive
-                          ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-semibold'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-transparent'
-                      }`
-                    }
-                  >
-                    <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                    <span className="flex-1">{item.label}</span>
-                    <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </NavLink>
-                );
-              })}
             </div>
           ))}
-        </div>
+        </nav>
 
-        {/* User Session Footer & Quick Switcher */}
-        <div className="p-3 border-t border-slate-800/80 bg-slate-900/40">
-          <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-cyan-900/50 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold text-xs">
-                  {user?.username?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div className="overflow-hidden">
-                  <p className="text-xs font-semibold text-white truncate">{user?.full_name || user?.username}</p>
-                  <StatusBadge value={user?.role} type="role" size="small" showDot={false} />
-                </div>
-              </div>
+        {/* Role Switcher & Telemetry Box */}
+        <div className="p-3 border-t border-border bg-white space-y-2">
+          <div className="p-2 rounded-md bg-subtle border border-border text-[11px]">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-muted font-medium">Active Persona</span>
+              <span className="font-bold text-secondary text-[10px] uppercase">
+                {isAdmin ? 'Admin' : 'Analyst'}
+              </span>
             </div>
-
+            <p className="text-secondary font-bold truncate">{user?.full_name || 'Alex Rivera'}</p>
             <button
               onClick={handleToggleRole}
-              title="Quickly switch stakeholder perspective for demonstration"
-              className="mt-1 w-full py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono flex items-center justify-center gap-1.5 transition"
+              className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 px-2 bg-white hover:bg-subtle border border-border rounded-md text-[11px] font-semibold text-secondary transition"
             >
-              <RefreshCw className="w-3 h-3 text-cyan-400" />
+              <RefreshCw className="w-3 h-3 text-primary" />
               <span>Switch to {isAdmin ? 'Analyst' : 'Admin'}</span>
             </button>
+          </div>
+
+          <div className="flex items-center justify-between text-[10px] font-mono text-muted px-1">
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              API: 24ms
+            </span>
+            <span>SQLite: Sync</span>
           </div>
         </div>
       </aside>
