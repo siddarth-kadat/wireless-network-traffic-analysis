@@ -16,6 +16,7 @@ import ProcessingBatches from './pages/ProcessingBatches';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import EngineStatus from './pages/EngineStatus';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -42,6 +43,8 @@ export default function App() {
             <Route path="/rules" element={<DetectionRules />} />
             <Route path="/batches" element={<ProcessingBatches />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/system-logs" element={<Reports />} />
+            <Route path="/engine-status" element={<EngineStatus />} />
             <Route
               path="/users"
               element={

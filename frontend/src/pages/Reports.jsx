@@ -51,7 +51,7 @@ export default function Reports() {
 
   const handleDownloadJSON = () => {
     const reportPayload = {
-      system: 'Wireless Network Traffic Analysis and Alerting System (W-NTASSOC)',
+      system: 'NetWatch - Wireless Network Traffic Analysis and Alerting System',
       generated_at: new Date().toISOString(),
       executive_summary: {
         total_pcap_batches: reportData.batches.length,
@@ -83,13 +83,13 @@ export default function Reports() {
       <div className="p-6 md:p-8 rounded-md bg-white border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="text-xs text-primary font-bold uppercase tracking-wider mb-1">
-            EXECUTIVE AUDIT // COMPLIANCE &amp; THREAT METRICS
+            SYSTEM // SYSTEM LOGS &amp; AUDIT REPORTS
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-secondary">
-            Executive Security Audit Report
+            System Logs &amp; Security Audit Reports
           </h1>
           <p className="text-sm text-muted mt-1">
-            Comprehensive posture assessment of wireless traffic analysis, deterministic rule performance, and alert resolution.
+            Comprehensive posture assessment of wireless traffic analysis, detection rule performance, and alert resolution.
           </p>
         </div>
 

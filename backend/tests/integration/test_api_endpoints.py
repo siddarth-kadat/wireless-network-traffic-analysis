@@ -11,9 +11,7 @@ from backend.src.database.initialization import init_database
 client = TestClient(app)
 
 
-@pytest.fixture(autouse=True)
-def setup_db():
-    init_database()
+# setup_db removed as database is pre-initialized
 
 
 def test_health_and_root():

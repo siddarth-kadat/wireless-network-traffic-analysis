@@ -122,13 +122,13 @@ export default function ProcessingBatches() {
       <div className="p-6 md:p-8 rounded-md bg-white border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="text-xs text-primary font-bold uppercase tracking-wider mb-1">
-            INGESTION PIPELINE // E1 &amp; E3 ENGINE
+            NETWORK MONITORING // PROCESSING HISTORY
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-secondary">
-            Capture Processing Batches
+            Processing History
           </h1>
           <p className="text-sm text-muted mt-1">
-            Historical audit log of all ingested PCAP/PCAPNG datasets, extraction metrics, and error rates.
+            Historical audit log of all processed PCAP/PCAPNG capture files, extraction metrics, and parsing status.
           </p>
         </div>
 

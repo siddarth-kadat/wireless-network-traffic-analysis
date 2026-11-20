@@ -125,13 +125,13 @@ export default function TrafficLogs() {
       <div className="p-6 md:p-8 rounded-md bg-white border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="text-xs text-primary font-bold uppercase tracking-wider mb-1">
-            NETWORK MONITORING // TRAFFIC EXPLORER
+            NETWORK MONITORING // NETWORK TRAFFIC EXPLORER
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-secondary">
-            Extracted Traffic Records
+            Network Traffic Explorer
           </h1>
           <p className="text-sm text-muted mt-1">
-            Normalized frame features dissected by E1 Log Processing Engine and stored in SQLite E3.
+            Normalized network traffic records extracted by Packet Processing Engine (E1) and stored in Log and Alert Storage (E3).
           </p>
         </div>
 

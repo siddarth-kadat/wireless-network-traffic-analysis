@@ -73,7 +73,7 @@ def _format_log(l: Traffic_Log) -> Dict[str, Any]:
 # ==============================================================================
 
 @router.post("/batches/upload")
-def upload_pcap_batch(
+async def upload_pcap_batch(
     file: UploadFile = File(...),
     user_id: Optional[str] = Form(None),
 ) -> Dict[str, Any]:

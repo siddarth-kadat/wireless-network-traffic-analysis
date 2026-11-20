@@ -103,13 +103,13 @@ export default function UploadPCAP() {
       {/* Page Header */}
       <div className="p-6 md:p-8 rounded-md bg-white border border-border">
         <div className="text-xs text-primary font-bold uppercase tracking-wider mb-1">
-          E1 LOG PROCESSING ENGINE // INGESTION STATION
+          NETWORK MONITORING // PCAP FILE PROCESSING
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-secondary">
-          PCAP Capture Ingestion Station
+          PCAP File Processing
         </h1>
         <p className="text-sm text-muted mt-1">
-          Upload raw packet captures (.pcap, .pcapng) for concurrent ingestion, deterministic validation, and layer parsing.
+          Upload raw packet captures (.pcap, .pcapng) for packet parsing, layer extraction, and automated suspicious activity detection.
         </p>
       </div>
 
@@ -171,7 +171,7 @@ export default function UploadPCAP() {
             <div className="flex items-center justify-between text-xs text-muted">
               <span className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span>E1 Parser: Extracting layers and validating batch...</span>
+                <span>Packet Processing Engine: Extracting layers and validating records...</span>
               </span>
               <span className="font-bold text-secondary">{uploadProgress}%</span>
             </div>
@@ -189,10 +189,10 @@ export default function UploadPCAP() {
           <button
             onClick={handleStartProcessing}
             disabled={!selectedFile || isProcessing}
-            className="w-full py-3 px-4 bg-primary hover:bg-primary-hover active:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-md text-sm flex items-center justify-center gap-2 transition"
+            className="w-full py-3 px-4 bg-primary hover:bg-primary-hover active:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-md text-sm flex items-center justify-center gap-2 transition shadow-2xs"
           >
             <Cpu className="w-4 h-4" />
-            <span>Process Capture with E1 Log Engine</span>
+            <span>Process Capture with Packet Processing Engine</span>
           </button>
         )}
 
@@ -202,7 +202,7 @@ export default function UploadPCAP() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-primary font-bold text-base">
                 <CheckCircle2 className="w-5 h-5 text-primary" />
-                <span>PCAP Batch Successfully Ingested</span>
+                <span>PCAP Capture File Successfully Processed</span>
               </div>
               <StatusBadge value={resultBatch.processing_status} />
             </div>

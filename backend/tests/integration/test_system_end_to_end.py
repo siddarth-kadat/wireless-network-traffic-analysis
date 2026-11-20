@@ -52,7 +52,7 @@ from backend.src.engines.e4_alert_generation.e4_engine import E4AlertEngine
 client = TestClient(app)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def setup_clean_db():
     """Ensure database is initialized before each test."""
     init_database()
@@ -136,7 +136,7 @@ def test_3_e3_to_e2_rule_retrieval():
     # Verify E2 engine initializes and loads rules successfully
     det_engine = SuspiciousPatternDetectionEngine(storage_engine=storage)
     loaded_rules = det_engine.rule_loader.load_rules_from_e3(storage)
-    assert len(loaded_rules) >= 4
+    assert len(loaded_rules) >= 6
 
 
 # ------------------------------------------------------------------------------

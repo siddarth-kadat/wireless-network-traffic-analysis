@@ -55,10 +55,13 @@ export default function Login() {
           </div>
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-secondary">
-              W-NTASSOC Console
+              NetWatch
             </h1>
-            <p className="text-sm text-muted mt-1">
-              Wireless Network Traffic Analysis &amp; Deterministic Alerting System
+            <p className="text-sm font-semibold text-primary mt-0.5">
+              Wireless Network Security Monitoring
+            </p>
+            <p className="text-xs text-muted mt-1">
+              Wireless Network Traffic Analysis and Alerting System
             </p>
           </div>
         </div>

@@ -34,31 +34,31 @@ export default function Settings() {
   const engines = [
     {
       id: 'E1',
-      name: 'Log Processing Engine',
-      description: 'PCAP & PCAPNG ingest, layer decoders, concurrent queue',
+      name: 'Packet Processing Engine',
+      description: 'Reads and parses network packet captures. Validates and normalizes packet records.',
       status: 'OPERATIONAL',
-      version: 'v1.0.0 (Scapy/dpkt)',
+      version: 'Active Engine',
     },
     {
       id: 'E2',
-      name: 'Suspicious Pattern Detection Engine',
-      description: 'Applies predefined deterministic rules, identifies anomalies',
+      name: 'Suspicious Activity Detection Engine',
+      description: 'Evaluates network traffic against configured detection rules. Identifies suspicious patterns.',
       status: 'OPERATIONAL',
-      version: 'v1.0.0 (Deterministic)',
+      version: 'Active Engine',
     },
     {
       id: 'E3',
       name: 'Log and Alert Storage Engine',
-      description: '7-Entity SQLite relational persistence via SQLAlchemy ORM',
+      description: 'Stores traffic logs, detection results and alerts. Provides configured detection rules to E2.',
       status: 'OPERATIONAL',
-      version: 'v1.0.0 (SQLite 3)',
+      version: 'Active Engine',
     },
     {
       id: 'E4',
       name: 'Alert Generation Engine',
-      description: 'Generates structured security alerts from E2 results',
+      description: 'Generates structured alerts from detection results. Sends generated alerts to E3 for storage.',
       status: 'OPERATIONAL',
-      version: 'v1.0.0 (Contract Compliant)',
+      version: 'Active Engine',
     },
   ];
 
